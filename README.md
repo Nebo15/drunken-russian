@@ -1,4 +1,5 @@
 # DrunkenRussian
+
 Tasks manager for PHP and MongoDB. 100% alcohol free.
 
 ## Before you start
@@ -24,7 +25,7 @@ Adding a task to the queue.
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$drunken = new \Drunken\Drunken(
+$drunken = new \Drunken\Manager(
     (new MongoClient())->selectDB('db_name')
 );
 

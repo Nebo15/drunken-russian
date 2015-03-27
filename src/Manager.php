@@ -2,7 +2,7 @@
 
 namespace Drunken;
 
-class Drunken
+class Manager
 {
     private $tasks;
     private $workersDir = null;
