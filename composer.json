@@ -9,6 +9,7 @@
         "php": ">=5.5.0"
     },
     "autoload": {
-        "psr-0": { "Drunken": "src/" }
-    }
+        "psr-4": { "Drunken\\": "src" }
+    },
+    "bin": ["bin/drunken"]
 }
