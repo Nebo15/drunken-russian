@@ -23,5 +23,5 @@ $drunken->add('file', [
 Run workers.
 
 ```shell
-vendor/bin/drunken --db=db_name --workers-dir=/path/to/drunken_workers/ do
+$ vendor/bin/drunken --db=db_name --workers-dir=/path/to/drunken_workers/ do
 ```
