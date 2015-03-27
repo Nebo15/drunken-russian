@@ -1,6 +1,20 @@
 # DrunkenRussian
 Tasks manager for PHP and MongoDB. 100% alcohol free.
 
+## Don't forget
+
+Create some useful indexes
+
+```shell
+$ vendor/bin/drunken --db=db_name init
+```
+
+Add a clearing task to cron
+
+```shell
+$ vendor/bin/drunken --db=db_name clear
+```
+
 ## Example
 
 Adding a task to the queue.
