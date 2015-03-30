@@ -35,6 +35,28 @@ $drunken->add('file', [
 ]);
 ```
 
+A worker. If the worker returns false or nothing, task will be marked as 'errored'.
+
+```php
+<?php
+
+namespace Drunken;
+
+class FileWorker
+{
+    public function doThisJob(array $data)
+    {
+        $result = file_put_contents($data['file'], sprintf("%s\n", $data['message']), FILE_APPEND);
+        
+        if ($result !== false) {
+            return true;
+        }
+        
+        return false;
+    }
+}
+```
+
 Run workers.
 
 ```shell
