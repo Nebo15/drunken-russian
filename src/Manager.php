@@ -41,7 +41,11 @@ class Manager
             include_once(sprintf('%s/%s.php', $this->workersDir, $class_name));
             $class_name_with_namespace = sprintf('\\Drunken\\%s', $class_name);
             $worker = new $class_name_with_namespace;
-            $done = $worker->doThisJob($doc['data']);
+            try {
+                $done = $worker->doThisJob($doc['data']);
+            } catch (\Exception $e) {
+                $done = false;
+            }
 
             $status = $done ? 'completed' : 'errored';
             $query = [
