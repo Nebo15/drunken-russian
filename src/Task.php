@@ -10,7 +10,7 @@ class Task
     public $expiresAt = null;
     public $priority = 0;
     public $data;
-    
+
     public function __construct($type, array $data, $priority = 0, $expiresAt = null)
     {
         $this->type = $type;
@@ -18,7 +18,7 @@ class Task
         $this->priority = $priority;
         $this->expiresAt = $expiresAt;
     }
-    
+
     public function getUniqueHash()
     {
         ksort($this->data);
