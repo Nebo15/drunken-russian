@@ -38,26 +38,42 @@ class Manager
                 throw new DrunkenException('Workers dir doesn\'t specified');
             }
             $class_name = sprintf('%sWorker', ucfirst($doc['type']));
-            include_once(sprintf('%s/%s.php', $this->workersDir, $class_name));
-            $class_name_with_namespace = sprintf('\\Drunken\\%s', $class_name);
-            $worker = new $class_name_with_namespace;
-            try {
-                $done = $worker->doThisJob($doc['data']);
-            } catch (\Exception $e) {
-                $done = false;
+            $class_path = sprintf('%s/%s.php', $this->workersDir, $class_name);
+
+            $mongo_data = ['status' => 'failed'];
+
+            if (!is_file($class_path)) {
+                $mongo_data['error'] = "Worker doesn't exists in $class_path";
+            } else {
+                include_once($class_path);
+                $class_name_with_namespace = sprintf('\\Drunken\\%s', $class_name);
+                $worker = new $class_name_with_namespace;
+
+                if ($worker instanceof AbstractWorker) {
+                    $worker->setDrunkenManager($this);
+                    try {
+                        $result = $worker->doThisJob($doc['data']);
+                        # if result is true - the job was completed successfully
+                        if ($result === true) {
+                            $mongo_data['status'] = 'completed';
+                        } else {
+                            # some troubles in worker, set error message
+                            $mongo_data['error'] = $result;
+                        }
+                    } catch (\Exception $e) {
+                        $mongo_data['error'] = $e->__toString();
+                    }
+                } else {
+                    $mongo_data['error'] = 'Worker must be an instance of AbstractWorker';
+                }
             }
 
-            $status = $done ? 'completed' : 'errored';
             $query = [
                 '_id' => $doc['_id'],
                 'status' => 'processing'
             ];
-            $this->tasks->update($query, [
-                '$set' => [
-                    'status' => $status,
-                    'completed_at' => new \MongoDate()
-                ]
-            ]);
+            $mongo_data['completed_at'] = new \MongoDate;
+            $this->tasks->update($query, ['$set' => $mongo_data]);
         }
     }
 

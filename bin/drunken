@@ -36,7 +36,7 @@ foreach (array_slice($argv, 1) as $param) {
 if (! array_key_exists('db', $options)) {
     out('Use some database name option --db=<name>');
 }
-$drunken = new \Drunken\Drunken((new MongoClient())->selectDB($options['db']));
+$drunken = new \Drunken\Manager((new MongoClient())->selectDB($options['db']));
 
 switch ($command) {
     case 'clear':

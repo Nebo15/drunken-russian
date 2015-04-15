@@ -2,7 +2,7 @@
 
 namespace Drunken;
 
-class FileWorker
+class FileWorker extends AbstractWorker
 {
     public function doThisJob(array $data)
     {
