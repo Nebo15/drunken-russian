@@ -42,7 +42,7 @@ A worker. If the worker returns false or nothing, task will be marked as 'errore
 
 namespace Drunken;
 
-class FileWorker
+class FileWorker extends AbstractWorker
 {
     public function doThisJob(array $data)
     {
