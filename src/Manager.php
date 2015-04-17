@@ -101,7 +101,7 @@ class Manager
 
     public function add($type, array $data, $priority = 0, $expiresAt = null)
     {
-        $this->addTask(new Task($type, $data, $priority, $expiresAt));
+        return $this->addTask(new Task($type, $data, $priority, $expiresAt));
     }
 
     public function addTask(Task $task)
@@ -119,7 +119,7 @@ class Manager
             $doc['expires_at'] = $task->expiresAt;
         }
         try {
-            $this->tasks->insert($doc);
+            return $this->tasks->insert($doc);
         } catch (\MongoDuplicateKeyException $e) {
             throw new DrunkenException(sprintf('Task duplicate id:%s', $task_id));
         }
