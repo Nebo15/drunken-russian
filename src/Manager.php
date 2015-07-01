@@ -119,9 +119,13 @@ class Manager
             $doc['expires_at'] = $task->expiresAt;
         }
         try {
-            return $this->tasks->insert($doc);
+            $result = $this->tasks->insert($doc);
+            if (array_key_exists('_id', $doc)) {
+                $result['id'] = $doc['_id'];
+            }
+            return $result;
         } catch (\MongoDuplicateKeyException $e) {
-            throw new DrunkenException(sprintf('Task duplicate id:%s', $task_id));
+            throw new DrunkenDuplicateTaskException(sprintf('Task duplicate id:%s', $task_id));
         }
     }
 }
