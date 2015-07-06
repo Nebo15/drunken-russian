@@ -12,6 +12,8 @@ abstract class AbstractWorker
     /** @var Manager $manager */
     private $manager;
 
+    private $task_id;
+
     /**
      * Do worker job.
      * Passed required data for worker in array
@@ -22,6 +24,16 @@ abstract class AbstractWorker
      * @return true | mixed
      */
     abstract public function doThisJob(array $data);
+
+    public function setTaskId($id)
+    {
+        $this->task_id = $id;
+    }
+
+    public function getTaskId()
+    {
+        return $this->task_id;
+    }
 
     public function setDrunkenManager(Manager $manager)
     {

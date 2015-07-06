@@ -50,6 +50,7 @@ class Manager
                 $worker = new $class_name_with_namespace;
 
                 if ($worker instanceof AbstractWorker) {
+                    $worker->setTaskId($doc['_id']);
                     $worker->setDrunkenManager($this);
                     try {
                         $result = $worker->doThisJob($doc['data']);
