@@ -57,9 +57,12 @@ class Manager
                         # if result is true - the job was completed successfully
                         if ($result === true) {
                             $mongo_data['status'] = 'completed';
-                        } else {
+                        } elseif (is_string($result)) {
                             # some troubles in worker, set error message
                             $mongo_data['error'] = $result;
+                        } else {
+                            $mongo_data['error'] = 'Returned error from worker should be a string. Returned: '
+                                . print_r($result, true);
                         }
                     } catch (\Exception $e) {
                         $mongo_data['error'] = $e->__toString();
@@ -97,6 +100,7 @@ class Manager
             'sort' => ['priority' => -1, 'created_at' => 1],
             'new' => true
         ]);
+
         return $doc;
     }
 
@@ -124,6 +128,7 @@ class Manager
             if (array_key_exists('_id', $doc)) {
                 $result['id'] = $doc['_id'];
             }
+
             return $result;
         } catch (\MongoDuplicateKeyException $e) {
             throw new DrunkenDuplicateTaskException(sprintf('Task duplicate id:%s', $task_id));

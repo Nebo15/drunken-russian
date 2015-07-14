@@ -18,10 +18,10 @@ abstract class AbstractWorker
      * Do worker job.
      * Passed required data for worker in array
      * If worker has completed their job successfully it must return TRUE.
-     * In other cases job will be marked as 'failed' and field 'error' will contain all returned data from worker
+     * In other cases job should return string with error, that will be stored in field 'error'. Task will be marked as 'failed'
      *
      * @param array $data
-     * @return true | mixed
+     * @return true | string
      */
     abstract public function doThisJob(array $data);
 
