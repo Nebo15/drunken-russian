@@ -33,10 +33,18 @@ foreach (array_slice($argv, 1) as $param) {
     }
 }
 
-if (! array_key_exists('db', $options)) {
-    out('Use some database name option --db=<name>');
+$config_path = array_key_exists('config', $options) ? $options['config'] : getcwd() . '/drunken.config.php';
+if(is_file($config_path)){
+    $config = require($config_path);
+} else {
+    $config = $options;
 }
-$drunken = new \Drunken\Manager((new MongoClient())->selectDB($options['db']));
+
+if (empty($config['db'])) {
+    out('Use some database name option --db=<name> or set it in config file');
+}
+$log_path = !empty($config['log_path']) ? $config['log_path'] : null;
+$drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $log_path);
 
 switch ($command) {
     case 'clear':
@@ -44,10 +52,10 @@ switch ($command) {
         out('cleared');
         break;
     case 'do':
-        if (! array_key_exists('workers-dir', $options)) {
-            out('Set some workers directory --workers-dir=<path>');
+        if (empty($config['workers-dir'])) {
+            out('Set some workers directory --workers-dir=<path> or set it in config file');
         }
-        $drunken->setWorkersDir($options['workers-dir']);
+        $drunken->setWorkersDir($config['workers-dir']);
         $drunken->doAll();
         out('done');
         break;

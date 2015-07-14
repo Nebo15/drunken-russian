@@ -16,6 +16,12 @@ Add a clearing task to cron
 $ vendor/bin/drunken --db=db_name clear
 ```
 
+## Config
+
+If you don't want use console options create config file *drunken.config.php* in the same directory, where script is called. Example of the config you can find in src directory.
+
+Also you can run drunken with option **--config="path_to_config"**
+
 ## Example
 
 Adding a task to the queue.

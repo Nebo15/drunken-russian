@@ -2,14 +2,21 @@
 
 namespace Drunken;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\LineFormatter;
+
 class Manager
 {
     private $tasks;
     private $workersDir = null;
+    private $log = null;
+    private $logPath = null;
 
-    public function __construct(\MongoDB $db)
+    public function __construct(\MongoDB $db, $log_path = null)
     {
         $this->tasks = $db->selectCollection('drunken_tasks');
+        $this->logPath = $log_path;
     }
 
     public function setWorkersDir($dir)
@@ -33,9 +40,12 @@ class Manager
 
     public function doAll()
     {
+        $this->log("Start run tasks");
         while ($doc = $this->getNext()) {
             if (!$this->workersDir) {
-                throw new DrunkenException('Workers dir doesn\'t specified');
+                $msg = 'Workers dir doesn\'t specified';
+                $this->log($msg, 'ERROR');
+                throw new DrunkenException($msg);
             }
             $class_name = sprintf('%sWorker', ucfirst($doc['type']));
             $class_path = sprintf('%s/%s.php', $this->workersDir, $class_name);
@@ -53,6 +63,7 @@ class Manager
                     $worker->setTaskId($doc['_id']);
                     $worker->setDrunkenManager($this);
                     try {
+                        $this->log(sprintf("Run task %s, worker: %s", $worker->getTaskId(), $class_name));
                         $result = $worker->doThisJob($doc['data']);
                         # if result is true - the job was completed successfully
                         if ($result === true) {
@@ -78,7 +89,23 @@ class Manager
             ];
             $mongo_data['completed_at'] = new \MongoDate;
             $this->tasks->update($query, ['$set' => $mongo_data]);
+            if (isset($mongo_data['error'])) {
+                $this->log(
+                    sprintf("Error received for task %s, worker %s : %s",
+                        $worker->getTaskId(),
+                        $class_name,
+                        $mongo_data['error']
+                    ),
+                    'ERROR'
+                );
+            } else {
+                $this->log(sprintf("Task %s of the worker %s successfully completed",
+                        $worker->getTaskId(),
+                        $class_name)
+                );
+            }
         }
+        $this->log('DONE');
     }
 
     private function getNext()
@@ -106,7 +133,7 @@ class Manager
 
     public function add($type, array $data, $priority = 0, $expiresAt = null)
     {
-        return $this->addTask(new Task($type, $data, $priority, $expiresAt));
+        $this->addTask(new Task($type, $data, $priority, $expiresAt));
     }
 
     public function addTask(Task $task)
@@ -124,14 +151,23 @@ class Manager
             $doc['expires_at'] = $task->expiresAt;
         }
         try {
-            $result = $this->tasks->insert($doc);
-            if (array_key_exists('_id', $doc)) {
-                $result['id'] = $doc['_id'];
-            }
-
-            return $result;
+            $this->tasks->insert($doc);
         } catch (\MongoDuplicateKeyException $e) {
-            throw new DrunkenDuplicateTaskException(sprintf('Task duplicate id:%s', $task_id));
+            throw new DrunkenException(sprintf('Task duplicate id:%s', $task_id));
+        }
+    }
+
+    private function log($msg, $level = 'INFO')
+    {
+        if ($this->logPath) {
+            if (!$this->log) {
+                $logger = new Logger('drunken');
+                $stream = new StreamHandler($this->logPath);
+                $stream->setFormatter(new LineFormatter());
+                $logger->pushHandler($stream);
+                $this->log = $logger;
+            }
+            $this->log->log($level, $msg);
         }
     }
 }
