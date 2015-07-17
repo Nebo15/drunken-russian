@@ -157,7 +157,7 @@ class Manager
         }
     }
 
-    private function log($msg, $level = 'INFO')
+    public function log($msg, $level = 'INFO')
     {
         if ($this->logPath) {
             if (!$this->log) {
