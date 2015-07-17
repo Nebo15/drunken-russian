@@ -151,7 +151,7 @@ class Manager
             $doc['expires_at'] = $task->expiresAt;
         }
         try {
-            $this->tasks->insert($doc);
+            return $this->tasks->insert($doc);
         } catch (\MongoDuplicateKeyException $e) {
             throw new DrunkenException(sprintf('Task duplicate id:%s', $task_id));
         }
