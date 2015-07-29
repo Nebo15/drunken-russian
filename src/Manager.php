@@ -12,11 +12,30 @@ class Manager
     private $workersDir = null;
     private $log = null;
     private $logPath = null;
+    private $hipchatClient = null;
 
     public function __construct(\MongoDB $db, $log_path = null)
     {
         $this->tasks = $db->selectCollection('drunken_tasks');
         $this->logPath = $log_path;
+    }
+
+    public function setHipchatClient($hc)
+    {
+        $this->hipchatClient = $hc;
+    }
+
+    private function sendHipchatMessage($message)
+    {
+        if (is_null($this->hipchatClient)) {
+            return false;
+        }
+        $this->hipchatClient->message_room(
+            $this->hipchatClient->drunkenRoom,
+            $this->hipchatClient->drunkenFrom,
+            $message,
+            true
+        );
     }
 
     public function setWorkersDir($dir)
@@ -90,6 +109,7 @@ class Manager
             $mongo_data['completed_at'] = new \MongoDate;
             $this->tasks->update($query, ['$set' => $mongo_data]);
             if (isset($mongo_data['error'])) {
+                $this->sendHipchatMessage($mongo_data['error']);
                 $this->log(
                     sprintf("Error received for task %s, worker %s : %s",
                         $worker->getTaskId(),

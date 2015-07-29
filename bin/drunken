@@ -46,6 +46,35 @@ if (empty($config['db'])) {
 $log_path = !empty($config['log_path']) ? $config['log_path'] : null;
 $drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $log_path);
 
+if (array_key_exists('hipchat', $config)) {
+    $hc = new HipChat\HipChat($config['hipchat']['token']);
+    $hc->drunkenRoom = $config['hipchat']['room'];
+    $hc->drunkenFrom = 'DrunkenRussian';
+
+    function hipchat_alert($hc, $message) {
+        $hc->message_room(
+            $hc->drunkenRoom,
+            $hc->drunkenFrom,
+            $message,
+            true,
+            HipChat\HipChat::COLOR_RED
+        );
+    }
+    set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($hc) {
+        $message = sprintf('PHP error %u: %s in %s on line %u', $errno, $errstr, $errfile, $errline);
+        hipchat_alert($hc, $message);
+        out($message);
+    });
+    set_exception_handler(function ($e) use ($hc) {
+        $message = sprintf('Exception: %s', $e->getMessage());
+        hipchat_alert($hc, $message);
+        out($message);
+    });
+
+    $drunken->setHipchatClient($hc);
+
+}
+
 switch ($command) {
     case 'clear':
         $drunken->clear();
