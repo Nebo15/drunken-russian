@@ -2,6 +2,14 @@
 
 Tasks manager for PHP and MongoDB. 100% alcohol free.
 
+## Install via Composer
+
+Run in your project root:
+
+```shell
+$ composer require nebo15/drunken-russian:dev-master
+```
+
 ## Before you start
 
 Create some useful indexes
