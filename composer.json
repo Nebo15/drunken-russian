@@ -1,5 +1,5 @@
 {
-    "name": "nebo15/DrunkenRussian",
+    "name": "nebo15/drunken-russian",
     "keywords": ["tasks", "queue", "manager", "PHP", "MongoDB"],
     "description": "Tasks (queue) manager for PHP and MongoDB. 100% alcohol free.",
     "author": "kedome",
