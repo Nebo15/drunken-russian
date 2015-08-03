@@ -173,7 +173,7 @@ class Manager
         try {
             return $this->tasks->insert($doc);
         } catch (\MongoDuplicateKeyException $e) {
-            throw new DrunkenException(sprintf('Task duplicate id:%s', $task_id));
+            throw new DrunkenDuplicateTaskException(sprintf('Task duplicate id:%s', $task_id));
         }
     }
 
