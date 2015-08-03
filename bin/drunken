@@ -49,7 +49,7 @@ $drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $l
 if (array_key_exists('hipchat', $config)) {
     $hc = new HipChat\HipChat($config['hipchat']['token']);
     $hc->drunkenRoom = $config['hipchat']['room'];
-    $hc->drunkenFrom = 'DrunkenRussian';
+    $hc->drunkenFrom = isset($config['hipchat']['from']) ? $config['hipchat']['room'] : 'DrunkenRussian';
 
     function hipchat_alert($hc, $message) {
         $hc->message_room(
