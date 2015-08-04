@@ -119,9 +119,11 @@ class Manager
                     'ERROR'
                 );
             } else {
-                $this->log(sprintf("Task %s of the worker %s successfully completed",
+                $this->log(
+                    sprintf("Task %s of the worker %s successfully completed",
                         $worker->getTaskId(),
-                        $class_name)
+                        $class_name
+                    )
                 );
             }
         }
@@ -171,7 +173,13 @@ class Manager
             $doc['expires_at'] = $task->expiresAt;
         }
         try {
-            return $this->tasks->insert($doc);
+            $return = $this->tasks->insert($doc);
+            if (isset($doc['_id'])) {
+                $return['id'] = $doc['_id'];
+            }
+
+            return $return;
+
         } catch (\MongoDuplicateKeyException $e) {
             throw new DrunkenDuplicateTaskException(sprintf('Task duplicate id:%s', $task_id));
         }
