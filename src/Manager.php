@@ -132,11 +132,21 @@ class Manager
 
     private function getNext()
     {
+        $time = new \MongoDate;
         $query = [
             'status' => 'created',
-            '$or' => [
-                ['expires_at' => ['$exists' => false]],
-                ['expires_at' => ['$gt' => new \MongoDate()]]
+            '$and' => [
+                ['$or' => [
+                    ['expires_at' => ['$exists' => false]],
+                    ['expires_at' => ['$gt' => $time]]
+                ]],
+                ['$or' => [
+                    ['run_interval' => ['$exists' => false]],
+                    ['$and' => [
+                        ['run_interval.from' => ['$lt' => $time]],
+                        ['run_interval.to' => ['$gte' => $time]],
+                    ]]
+                ]]
             ]
         ];
         $update = [
@@ -167,10 +177,13 @@ class Manager
             'status' => 'created',
             'created_at' => new \MongoDate(),
             'priority' => $task->priority ? $task->priority : 0,
-            'data' => $task->data
+            'data' => $task->data,
         ];
         if ($task->expiresAt) {
             $doc['expires_at'] = $task->expiresAt;
+        }
+        if ($task->run_interval) {
+            $doc['run_interval'] = $task->run_interval;
         }
         try {
             $return = $this->tasks->insert($doc);
