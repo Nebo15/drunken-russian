@@ -12,12 +12,15 @@ class Task
     public $run_interval = [];
     public $data;
 
-    public function __construct($type, array $data, $priority = 0, $expiresAt = null)
+    public function __construct($type, array $data, $priority = 0, $expiresAt = null, $from = null, $to = null)
     {
         $this->type = $type;
         $this->data = $data;
         $this->priority = $priority;
         $this->expiresAt = $expiresAt;
+        if ($from and $to) {
+            $this->setRunInterval($from, $to);
+        }
     }
 
     public function setRunInterval($from, $to)
