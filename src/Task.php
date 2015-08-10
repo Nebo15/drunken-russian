@@ -22,7 +22,9 @@ class Task
 
     public function setRunInterval($from, $to)
     {
-        if($from = strtotime($from) and $to = strtotime($to)){
+        $from = is_string($from) ? strtotime($from) : $from;
+        $to = is_string($to) ? strtotime($to) : $to;
+        if ($from and $to) {
             $this->run_interval = [
                 'from' => new \MongoDate($from),
                 'to' => new \MongoDate($to),
