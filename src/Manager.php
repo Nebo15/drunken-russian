@@ -88,8 +88,18 @@ class Manager
                         if ($result === true) {
                             $mongo_data['status'] = 'completed';
                         } elseif (is_string($result)) {
-                            # some troubles in worker, set error message
-                            $mongo_data['error'] = $result;
+                            if (preg_match('/delay\:\d+/', $result)) {
+                                $delay = explode(':', $result)[1];
+                                $mongo_data['status'] = 'created';
+                                $mongo_data['data.delay'] = $delay;
+                                $mongo_data['run_interval'] = [
+                                    'from' => new \MongoDate(time() + $delay),
+                                    'to' => new \MongoDate(time() + 3600 + $delay),
+                                ];
+                            } else {
+                                # some troubles in worker, set error message
+                                $mongo_data['error'] = $result;
+                            }
                         } else {
                             $mongo_data['error'] = 'Returned error from worker should be a string. Returned: '
                                 . print_r($result, true);
