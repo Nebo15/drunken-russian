@@ -2,6 +2,7 @@
 
 namespace Drunken;
 
+use HipChat\HipChat;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
@@ -12,6 +13,7 @@ class Manager
     private $workersDir = null;
     private $log = null;
     private $logPath = null;
+    /** @var HipChat $hipchatClient */
     private $hipchatClient = null;
 
     public function __construct(\MongoDB $db, $log_path = null)
@@ -20,21 +22,23 @@ class Manager
         $this->logPath = $log_path;
     }
 
-    public function setHipchatClient($hc)
+    public function setHipchatClient(HipChat $hc)
     {
         $this->hipchatClient = $hc;
     }
 
-    private function sendHipchatMessage($message)
+    public function sendHipchatMessage($message, $color = HipChat::COLOR_YELLOW, $notify = true)
     {
         if (is_null($this->hipchatClient)) {
             return false;
         }
+
         $this->hipchatClient->message_room(
             $this->hipchatClient->drunkenRoom,
             $this->hipchatClient->drunkenFrom,
             $message,
-            true
+            $notify,
+            $color
         );
     }
 
@@ -88,8 +92,18 @@ class Manager
                         if ($result === true) {
                             $mongo_data['status'] = 'completed';
                         } elseif (is_string($result)) {
-                            # some troubles in worker, set error message
-                            $mongo_data['error'] = $result;
+                            if (preg_match('/delay\:\d+/', $result)) {
+                                $delay = explode(':', $result)[1];
+                                $mongo_data['status'] = 'created';
+                                $mongo_data['data.delay'] = $delay;
+                                $mongo_data['run_interval'] = [
+                                    'from' => new \MongoDate(time() + $delay),
+                                    'to' => new \MongoDate(time() + 3600 + $delay),
+                                ];
+                            } else {
+                                # some troubles in worker, set error message
+                                $mongo_data['error'] = $result;
+                            }
                         } else {
                             $mongo_data['error'] = 'Returned error from worker should be a string. Returned: '
                                 . var_export($result, true);
@@ -136,17 +150,23 @@ class Manager
         $query = [
             'status' => 'created',
             '$and' => [
-                ['$or' => [
-                    ['expires_at' => ['$exists' => false]],
-                    ['expires_at' => ['$gt' => $time]]
-                ]],
-                ['$or' => [
-                    ['run_interval' => ['$exists' => false]],
-                    ['$and' => [
-                        ['run_interval.from' => ['$lt' => $time]],
-                        ['run_interval.to' => ['$gte' => $time]],
-                    ]]
-                ]]
+                [
+                    '$or' => [
+                        ['expires_at' => ['$exists' => false]],
+                        ['expires_at' => ['$gt' => $time]]
+                    ]
+                ],
+                [
+                    '$or' => [
+                        ['run_interval' => ['$exists' => false]],
+                        [
+                            '$and' => [
+                                ['run_interval.from' => ['$lt' => $time]],
+                                ['run_interval.to' => ['$gte' => $time]],
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ];
         $update = [

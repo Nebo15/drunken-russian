@@ -49,7 +49,14 @@ $drunken->add('file', [
 ]);
 ```
 
-A worker. If the worker returns false or nothing, task will be marked as 'errored'.
+### Returned data from workers
+
+* `true` - task successfully completed
+* `string` - error string, that will be stored in error field
+* `string` **delay:\d+** - delay task for passed seconds
+
+If the worker returns something else task will be marked as 'failed'.
+
 
 ```php
 <?php
