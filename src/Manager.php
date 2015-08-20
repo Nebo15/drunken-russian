@@ -92,7 +92,7 @@ class Manager
                             $mongo_data['error'] = $result;
                         } else {
                             $mongo_data['error'] = 'Returned error from worker should be a string. Returned: '
-                                . print_r($result, true);
+                                . var_export($result, true);
                         }
                     } catch (\Exception $e) {
                         $mongo_data['error'] = $e->__toString();
