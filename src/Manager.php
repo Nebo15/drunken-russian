@@ -44,7 +44,9 @@ class Manager
 
     public function setWorkersDir($dir)
     {
-        $this->workersDir = rtrim($dir, '/\\');
+        $this->workersDir = is_array($dir) ? array_map(function ($dir) {
+            return rtrim($dir, '/\\');
+        }, $dir) : rtrim($dir, '/\\');
     }
 
     public function clear()
@@ -71,13 +73,27 @@ class Manager
                 throw new DrunkenException($msg);
             }
             $class_name = sprintf('%sWorker', ucfirst($doc['type']));
-            $class_path = sprintf('%s/%s.php', $this->workersDir, $class_name);
+
+            $worker_exist = false;
+            if(is_array($this->workersDir)){
+                foreach($this->workersDir as $dir){
+                    $class_path = sprintf('%s/%s.php', $dir, $class_name);
+                    if(is_file($class_path)){
+                        $worker_exist = true;
+                        break;
+                    }
+                }
+            } else {
+                $class_path = sprintf('%s/%s.php', $this->workersDir, $class_name);
+                $worker_exist = is_file($class_path);
+            }
 
             $mongo_data = ['status' => 'failed'];
 
-            if (!is_file($class_path)) {
-                $mongo_data['error'] = "Worker doesn't exists in $class_path";
-            } else {
+            if (!$worker_exist) {
+                $path_dir = is_array($this->workersDir) ? implode(', ', $this->workersDir) : $this->workersDir;
+                $mongo_data['error'] = "Worker $class_name doesn't exists in directory $path_dir";
+            }else {
                 include_once($class_path);
                 $class_name_with_namespace = sprintf('\\Drunken\\%s', $class_name);
                 $worker = new $class_name_with_namespace;
