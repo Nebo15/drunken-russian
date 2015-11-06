@@ -4,7 +4,6 @@
     "description": "Tasks (queue) manager for PHP and MongoDB. 100% alcohol free.",
     "author": "kedome",
     "license": "MIT",
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.5.0",
         "monolog/monolog": "1.*",
@@ -13,5 +12,6 @@
     "autoload": {
         "psr-4": { "Drunken\\": "src" }
     },
-    "bin": ["bin/drunken"]
+    "bin": ["bin/drunken"],
+    "version": "1.0.0"
 }
