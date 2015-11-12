@@ -75,10 +75,10 @@ class Manager
             $class_name = sprintf('%sWorker', ucfirst($doc['type']));
 
             $worker_exist = false;
-            if(is_array($this->workersDir)){
-                foreach($this->workersDir as $dir){
+            if (is_array($this->workersDir)) {
+                foreach ($this->workersDir as $dir) {
                     $class_path = sprintf('%s/%s.php', $dir, $class_name);
-                    if(is_file($class_path)){
+                    if (is_file($class_path)) {
                         $worker_exist = true;
                         break;
                     }
@@ -93,7 +93,7 @@ class Manager
             if (!$worker_exist) {
                 $path_dir = is_array($this->workersDir) ? implode(', ', $this->workersDir) : $this->workersDir;
                 $mongo_data['error'] = "Worker $class_name doesn't exists in directory $path_dir";
-            }else {
+            } else {
                 include_once($class_path);
                 $class_name_with_namespace = sprintf('\\Drunken\\%s', $class_name);
                 $worker = new $class_name_with_namespace;
@@ -142,7 +142,7 @@ class Manager
                 $this->sendHipchatMessage($mongo_data['error']);
                 $this->log(
                     sprintf("Error received for task %s, worker %s : %s",
-                        $worker->getTaskId(),
+                        isset($worker) ? $worker->getTaskId() : 'undefined',
                         $class_name,
                         $mongo_data['error']
                     ),
@@ -151,7 +151,7 @@ class Manager
             } else {
                 $this->log(
                     sprintf("Task %s of the worker %s successfully completed",
-                        $worker->getTaskId(),
+                        isset($worker) ? $worker->getTaskId() : 'undefined',
                         $class_name
                     )
                 );
