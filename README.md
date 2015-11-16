@@ -28,6 +28,16 @@ $ vendor/bin/drunken --db=db_name clear
 
 If you don't want use console options create config file *drunken.config.php* in the same directory, where script is called. Example of the config you can find in src directory.
 
+Available fields:
+
+* *db* - database name
+* *workers-dir* - string or array, path where workers file are located
+* *log_path* - path for drunken logs
+* *hipchat* - hipchat integration:
+  * from - sender name
+  * token
+  * room
+
 Also you can run drunken with option **--config="path_to_config"**
 
 ## Example
