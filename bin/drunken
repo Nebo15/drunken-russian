@@ -2,7 +2,7 @@
 <?php
 
 $help = <<< END
-usage: drunken --db=<name> --workers-dir=<path> <command>
+usage: drunken --db=<name> --workers-dir=<path> --config=<path> <command>
 
 The most commonly used commands are:
     clear   Delete all completed tasks with 1 month old
