@@ -34,7 +34,7 @@ foreach (array_slice($argv, 1) as $param) {
 }
 
 $config_path = array_key_exists('config', $options) ? $options['config'] : getcwd() . '/drunken.config.php';
-if(is_file($config_path)){
+if (is_file($config_path)) {
     $config = require($config_path);
 } else {
     $config = $options;
@@ -51,7 +51,8 @@ if (array_key_exists('hipchat', $config)) {
     $hc->drunkenRoom = $config['hipchat']['room'];
     $hc->drunkenFrom = isset($config['hipchat']['from']) ? $config['hipchat']['from'] : 'DrunkenRussian';
 
-    function hipchat_alert($hc, $message) {
+    function hipchat_alert($hc, $message)
+    {
         $hc->message_room(
             $hc->drunkenRoom,
             $hc->drunkenFrom,
@@ -60,6 +61,7 @@ if (array_key_exists('hipchat', $config)) {
             HipChat\HipChat::COLOR_RED
         );
     }
+
     set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($hc) {
         $message = sprintf('PHP error %u: %s in %s on line %u', $errno, $errstr, $errfile, $errline);
         hipchat_alert($hc, $message);
