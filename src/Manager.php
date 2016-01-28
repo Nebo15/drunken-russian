@@ -15,6 +15,8 @@ class Manager
     private $logPath = null;
     /** @var HipChat $hipchatClient */
     private $hipchatClient = null;
+    /** @var Slack $slackClient */
+    private $slackClient = null;
 
     public function __construct(\MongoDB $db, $log_path = null)
     {
@@ -25,6 +27,11 @@ class Manager
     public function setHipchatClient(HipChat $hc)
     {
         $this->hipchatClient = $hc;
+    }
+
+    public function setSlackClient(Slack $slack)
+    {
+        $this->slackClient = $slack;
     }
 
     public function sendHipchatMessage($message, $color = HipChat::COLOR_YELLOW, $notify = true)
@@ -40,6 +47,17 @@ class Manager
             $notify,
             $color
         );
+    }
+
+    public function sendSlackMessage($message, $type = 'info')
+    {
+        $available = ['info', 'error', 'warning'];
+        if (!in_array($type, $available)) {
+            throw new DrunkenException(
+                "Unavailable message type for Slack: '$type'. Should be one of " . implode(', ', $type)
+            );
+        }
+        $this->slackClient->$type($message);
     }
 
     public function setWorkersDir($dir)

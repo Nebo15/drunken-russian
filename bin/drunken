@@ -46,6 +46,11 @@ if (empty($config['db'])) {
 $log_path = !empty($config['log_path']) ? $config['log_path'] : null;
 $drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $log_path);
 
+if (array_key_exists('slack', $config)) {
+    $slack = ['slack'];
+    $drunken->setSlackClient(new \Drunken\Slack($slack['url'], $slack['channel'], $slack['username']));
+}
+
 if (array_key_exists('hipchat', $config)) {
     $hc = new HipChat\HipChat($config['hipchat']['token']);
     $hc->drunkenRoom = $config['hipchat']['room'];
