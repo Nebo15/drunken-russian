@@ -47,7 +47,7 @@ $log_path = !empty($config['log_path']) ? $config['log_path'] : null;
 $drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $log_path);
 
 if (array_key_exists('slack', $config)) {
-    $slack = ['slack'];
+    $slack = $config['slack'];
     $drunken->setSlackClient(new \Drunken\Slack($slack['url'], $slack['channel'], $slack['username']));
 }
 

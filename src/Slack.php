@@ -10,11 +10,6 @@ class Slack
     private $guzzle;
     private $channel;
     private $username;
-    private $messages = [
-        '#439FE0' => [],
-        'danger' => [],
-        'warning' => [],
-    ];
 
     public function __construct($url, $channel, $username)
     {
@@ -26,41 +21,33 @@ class Slack
 
     public function info($message)
     {
-        $this->messages['#439FE0'][] = $message;
+        $this->sendMessage($message, '#439FE0');
     }
 
     public function warning($message)
     {
-        $this->messages['warning'][] = $message;
+        $this->sendMessage($message, 'warning');
     }
 
     public function error($message)
     {
-        $this->messages['danger'][] = $message;
+        $this->sendMessage($message, 'danger');
     }
 
-    public function sendCollectedMessages()
+    public function sendMessage($message, $color)
     {
-        foreach ($this->messages as $color => $messages) {
-            if ($messages) {
-                foreach ($messages as $key => $message) {
-                    $data = [
-                        'username' => $this->username,
-                        "icon_emoji" => ":cop:",
-                        'attachments' => [
-                            [
-                                "fallback" => "MBill.co report: $message",
-                                'color' => $color,
-                                "text" => $message,
-                                'pretext' => "MBill.co report:",
-                            ]
-                        ],
-                    ];
-                    $this->guzzle->post($this->url, ['json' => $data]);
-
-                    unset($this->messages[$color][$key]);
-                }
-            }
-        }
+        $data = [
+            'username' => $this->username,
+            "icon_emoji" => ":cop:",
+            'attachments' => [
+                [
+                    "fallback" => "MBill.co report: $message",
+                    'color' => $color,
+                    "text" => $message,
+                    'pretext' => "MBill.co report:",
+                ]
+            ],
+        ];
+        $this->guzzle->post($this->url, ['json' => $data]);
     }
 }
