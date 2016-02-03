@@ -11,15 +11,26 @@ class Task
     public $priority = 0;
     public $run_interval = [];
     public $data;
+    private $ignore_fields_for_unique_hash = [];
 
-    public function __construct($type, array $data, $priority = 0, $expiresAt = null, $from = null, $to = null)
-    {
+    public function __construct(
+        $type,
+        array $data,
+        $priority = 0,
+        $expiresAt = null,
+        $from = null,
+        $to = null,
+        $ignoreFieldsForUniqueHash = null
+    ) {
         $this->type = $type;
         $this->data = $data;
         $this->priority = $priority;
         $this->expiresAt = $expiresAt;
         if ($from and $to) {
             $this->setRunInterval($from, $to);
+        }
+        if ($ignoreFieldsForUniqueHash) {
+            $this->setIgnoreFieldsForUniqueHash($ignoreFieldsForUniqueHash);
         }
     }
 
@@ -37,11 +48,32 @@ class Task
         return $this;
     }
 
+    /**
+     * @param string|array $fields
+     * @return $this
+     */
+    public function setIgnoreFieldsForUniqueHash($fields)
+    {
+        if (!is_array($fields)) {
+            $fields = [$fields];
+        }
+        $this->ignore_fields_for_unique_hash = $fields;
+
+        return $this;
+    }
+
     public function getUniqueHash()
     {
-        ksort($this->data);
-        $hash = sha1(sprintf('%s%s', $this->type, serialize($this->data)));
+        $data = $this->data;
+        if ($this->ignore_fields_for_unique_hash) {
+            foreach ($this->ignore_fields_for_unique_hash as $field) {
+                if (array_key_exists($field, $data)) {
+                    unset($data[$field]);
+                }
+            }
+        }
+        ksort($data);
 
-        return $hash;
+        return sha1(sprintf('%s%s', $this->type, serialize($data)));
     }
 }

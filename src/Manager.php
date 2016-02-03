@@ -159,7 +159,8 @@ class Manager
             if (isset($mongo_data['error'])) {
                 $this->sendHipchatMessage($mongo_data['error']);
                 $this->log(
-                    sprintf("Error received for task %s, worker %s : %s",
+                    sprintf(
+                        "Error received for task %s, worker %s : %s",
                         isset($worker) ? $worker->getTaskId() : 'undefined',
                         $class_name,
                         $mongo_data['error']
@@ -168,7 +169,8 @@ class Manager
                 );
             } else {
                 $this->log(
-                    sprintf("Task %s of the worker %s successfully completed",
+                    sprintf(
+                        "Task %s of the worker %s successfully completed",
                         isset($worker) ? $worker->getTaskId() : 'undefined',
                         $class_name
                     )
@@ -217,9 +219,9 @@ class Manager
         return $doc;
     }
 
-    public function add($type, array $data, $priority = 0, $expiresAt = null)
+    public function add($type, array $data, $priority = 0, $expiresAt = null, $ignoreFieldsForUniqueHash = null)
     {
-        return $this->addTask(new Task($type, $data, $priority, $expiresAt));
+        return $this->addTask(new Task($type, $data, $priority, $expiresAt, null, null, $ignoreFieldsForUniqueHash));
     }
 
     public function addTask(Task $task)
