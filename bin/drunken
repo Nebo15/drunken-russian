@@ -83,7 +83,7 @@ if (array_key_exists('hipchat', $config)) {
 
 switch ($command) {
     case 'clear':
-        $drunken->clear();
+        $drunken->clear(empty($config['tasks-clear-period']) ? $config['tasks-clear-period'] : '-1 month');
         out('cleared');
         break;
     case 'do':

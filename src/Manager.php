@@ -67,11 +67,11 @@ class Manager
         }, $dir) : rtrim($dir, '/\\');
     }
 
-    public function clear()
+    public function clear($period = '-1 month')
     {
         $this->tasks->remove([
             'status' => 'completed',
-            'completed_at' => ['$lt' => new \MongoDate((new \DateTime('-1 month'))->getTimestamp())]
+            'completed_at' => ['$lt' => new \MongoDate((new \DateTime($period))->getTimestamp())]
         ]);
     }
 
