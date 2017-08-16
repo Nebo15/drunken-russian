@@ -14,5 +14,5 @@
         "psr-4": { "Drunken\\": "src" }
     },
     "bin": ["bin/drunken"],
-    "version": "1.0.6"
+    "version": "1.0.7"
 }

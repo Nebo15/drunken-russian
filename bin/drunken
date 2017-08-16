@@ -2,7 +2,7 @@
 <?php
 
 $help = <<< END
-usage: drunken --db=<name> --workers-dir=<path> --config=<path> <command>
+usage: drunken --workers-dir=<path> --config=<path> <command>
 
 The most commonly used commands are:
     clear   Delete all completed tasks with 1 month old
@@ -40,11 +40,23 @@ if (is_file($config_path)) {
     $config = $options;
 }
 
-if (empty($config['db'])) {
-    out('Use some database name option --db=<name> or set it in config file');
+if(empty($config['database'])) {
+    out('Configure `database` section in config file');
+} else {
+    $db_config = $config['database'];
+    if (empty($db_config['name'])) {
+        out('Set `database.name` in config file');
+    }
 }
+
+$host = !empty($db_config['host']) ? $db_config['host'] : "localhost";
+$port = !empty($db_config['port']) ? $db_config['port'] : 27017;
+
+$client = new MongoClient(sprintf("mongodb://%s:%d", $host, $port));
+$db = $client->selectDB($db_config['name']);
+
 $log_path = !empty($config['log_path']) ? $config['log_path'] : null;
-$drunken = new \Drunken\Manager((new MongoClient())->selectDB($config['db']), $log_path);
+$drunken = new \Drunken\Manager($db, $log_path);
 
 if (array_key_exists('slack', $config)) {
     $slack = $config['slack'];
